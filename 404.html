@@ -1,133 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="/KMONVERSI02/">
-
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="dreamflow_counter">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
-
   <title>dreamflow_counter</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <!-- Firebase reCAPTCHA container for Phone Auth -->
-  <div id="recaptcha-container" style="display: none;"></div>
-  
-  <!-- Firebase Web SDK v9 -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-    
-    // Firebase config (will be populated by Flutter)
-    const firebaseConfig = {
-      apiKey: "AIzaSyD4u6tpW8HQB02hqQgpuv1DGNNDrVVOIEM",
-      authDomain: "kmonversi1.firebaseapp.com",
-      projectId: "kmonversi1",
-      storageBucket: "kmonversi1.firebasestorage.app",
-      messagingSenderId: "55377257405",
-      appId: "1:55377257405:web:c8d64c4cf38a7d0ba6a8d4"
-    };
-    
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    
-    // Global variables for Flutter to access
-    window.firebaseAuth = auth;
-    window.RecaptchaVerifier = RecaptchaVerifier;
-    window.signInWithPhoneNumber = signInWithPhoneNumber;
-    
-    // Setup reCAPTCHA verifier
-    window.setupRecaptcha = function() {
-      if (!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': (response) => {
-            console.log('reCAPTCHA solved');
-          },
-          'expired-callback': () => {
-            console.log('reCAPTCHA expired');
-          }
-        });
-      }
-      return window.recaptchaVerifier;
-    };
-    
-    // Send OTP function
-    window.sendOtpWeb = async function(phoneNumber) {
-      try {
-        const recaptcha = window.setupRecaptcha();
-        const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptcha);
-        window.confirmationResult = confirmationResult;
-        return { success: true, message: 'OTP sent successfully' };
-      } catch (error) {
-        console.error('Error sending OTP:', error);
-        return { success: false, message: error.message };
-      }
-    };
-    
-    // Verify OTP function
-    window.verifyOtpWeb = async function(code) {
-      try {
-        console.log('Verifying OTP code:', code);
-        
-        if (!window.confirmationResult) {
-          throw new Error('No confirmation result available. Please send OTP first.');
-        }
-        
-        const result = await window.confirmationResult.confirm(code);
-        console.log('OTP verification successful:', result);
-        
-        return { 
-          success: true, 
-          user: result.user,
-          message: 'OTP verified successfully'
-        };
-      } catch (error) {
-        console.error('Error verifying OTP:', error);
-        
-        // Provide more specific error messages
-        let errorMessage = error.message;
-        if (error.code === 'auth/invalid-verification-code') {
-          errorMessage = 'Kode OTP salah. Silakan periksa kembali.';
-        } else if (error.code === 'auth/code-expired') {
-          errorMessage = 'Kode OTP sudah kedaluwarsa. Silakan minta kode baru.';
-        } else if (error.code === 'auth/too-many-requests') {
-          errorMessage = 'Terlalu banyak percobaan. Silakan coba lagi nanti.';
-        }
-        
-        return { 
-          success: false, 
-          message: errorMessage,
-          code: error.code
-        };
-      }
-    };
-  </script>
-  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
