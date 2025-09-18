@@ -31,14 +31,79 @@
 
   <title>dreamflow_counter</title>
   <link rel="manifest" href="manifest.json">
-  
-  <!-- Firebase Web SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <!-- Firebase reCAPTCHA container for Phone Auth -->
-  <div id="recaptcha-container"></div>
+  <div id="recaptcha-container" style="display: none;"></div>
+  
+  <!-- Firebase Web SDK v9 -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+    
+    // Firebase config (will be populated by Flutter)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4u6tpW8HQB02hqQgpuv1DGNNDrVVOIEM",
+      authDomain: "kmonversi1.firebaseapp.com",
+      projectId: "kmonversi1",
+      storageBucket: "kmonversi1.firebasestorage.app",
+      messagingSenderId: "55377257405",
+      appId: "1:55377257405:web:c8d64c4cf38a7d0ba6a8d4"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    // Global variables for Flutter to access
+    window.firebaseAuth = auth;
+    window.RecaptchaVerifier = RecaptchaVerifier;
+    window.signInWithPhoneNumber = signInWithPhoneNumber;
+    
+    // Setup reCAPTCHA verifier
+    window.setupRecaptcha = function() {
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response) => {
+            console.log('reCAPTCHA solved');
+          },
+          'expired-callback': () => {
+            console.log('reCAPTCHA expired');
+          }
+        });
+      }
+      return window.recaptchaVerifier;
+    };
+    
+    // Send OTP function
+    window.sendOtpWeb = async function(phoneNumber) {
+      try {
+        const recaptcha = window.setupRecaptcha();
+        const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptcha);
+        window.confirmationResult = confirmationResult;
+        return { success: true, message: 'OTP sent successfully' };
+      } catch (error) {
+        console.error('Error sending OTP:', error);
+        return { success: false, message: error.message };
+      }
+    };
+    
+    // Verify OTP function
+    window.verifyOtpWeb = async function(code) {
+      try {
+        if (!window.confirmationResult) {
+          throw new Error('No confirmation result available');
+        }
+        const result = await window.confirmationResult.confirm(code);
+        return { success: true, user: result.user };
+      } catch (error) {
+        console.error('Error verifying OTP:', error);
+        return { success: false, message: error.message };
+      }
+    };
+  </script>
+  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
