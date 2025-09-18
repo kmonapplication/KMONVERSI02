@@ -92,14 +92,38 @@
     // Verify OTP function
     window.verifyOtpWeb = async function(code) {
       try {
+        console.log('Verifying OTP code:', code);
+        
         if (!window.confirmationResult) {
-          throw new Error('No confirmation result available');
+          throw new Error('No confirmation result available. Please send OTP first.');
         }
+        
         const result = await window.confirmationResult.confirm(code);
-        return { success: true, user: result.user };
+        console.log('OTP verification successful:', result);
+        
+        return { 
+          success: true, 
+          user: result.user,
+          message: 'OTP verified successfully'
+        };
       } catch (error) {
         console.error('Error verifying OTP:', error);
-        return { success: false, message: error.message };
+        
+        // Provide more specific error messages
+        let errorMessage = error.message;
+        if (error.code === 'auth/invalid-verification-code') {
+          errorMessage = 'Kode OTP salah. Silakan periksa kembali.';
+        } else if (error.code === 'auth/code-expired') {
+          errorMessage = 'Kode OTP sudah kedaluwarsa. Silakan minta kode baru.';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMessage = 'Terlalu banyak percobaan. Silakan coba lagi nanti.';
+        }
+        
+        return { 
+          success: false, 
+          message: errorMessage,
+          code: error.code
+        };
       }
     };
   </script>
